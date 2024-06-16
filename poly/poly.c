@@ -115,22 +115,39 @@ struct poly_t *mul(struct poly_t *a, struct poly_t *b)
         {
             int exp = a->exponents[i] + b->exponents[j];
             int coeff = a->coefficients[i] * b->coefficients[j];
+            int index = 0;
+            int smaller = 0;
             for (int k = 0; k < p->length; k++)
             {
                 if (p->exponents[k] == exp)
                 {
                     p->coefficients[k] = p->coefficients[k] + coeff;
                     goto next_x;
+                }else{
+                    if(p->exponents[k] < exp){
+                        smaller = 1;
+                    }
+                    if(smaller != 1){
+                        index = k + 1;
+                    }
                 }
             }
             p->length++;
             p->exponents = realloc(p->exponents, p->length * sizeof(int));
             p->coefficients = realloc(p->coefficients, p->length * sizeof(int));
-            p->exponents[p->length - 1] = exp;
-            p->coefficients[p->length - 1] = coeff;
+            if(smaller == 1){
+                for (int q = p->length -1; q > index; q--)
+                {
+                    p->exponents[q] = p->exponents[q-1];
+                    p->coefficients[q] = p->coefficients[q-1];
+                }
+            }
+            p->exponents[index] = exp;
+            p->coefficients[index] = coeff;
         next_x:;
         }
     }
+    
     return p;
 }
 
@@ -145,6 +162,8 @@ void print_poly(struct poly_t *p)
             if (i != 0)
             {
                 coeff > 0 ? printf(" + ") : printf(" - ");
+            }else if(coeff < 0){
+                printf("- ");
             }
             if (coeff != 1 || exp == 0)
                 printf("%d", abs(coeff));
